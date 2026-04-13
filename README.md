@@ -36,3 +36,9 @@ From PowerShell on Windows:
 
 ```powershell
 ssh -i "D:\TMU_CLASSES\FOURTH_YEAR\2nd_Semester\CPS730\Lab7\Lab7.pem" ubuntu@YOUR_PUBLIC_IP
+```
+
+For Ubuntu EC2 instances, the username is:
+```powershell
+ubuntu
+```
