@@ -1,0 +1,3 @@
+CS 301 - Software Engineering
+CS 211 - Software Testing
+CS 730 - Web Technology
