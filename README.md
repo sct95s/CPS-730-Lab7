@@ -42,3 +42,6 @@ For Ubuntu EC2 instances, the username is:
 ```powershell
 ubuntu
 ```
+
+---
+
