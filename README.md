@@ -292,8 +292,121 @@ Ctrl + C
 ```
 
 
-## Step 2: Change the import line
-At the top of app.py, change this:
+## Step 2: Change the code
+On the first ssh
+```powershell
+cd ~/redis-lab
+cat > app.py <<'PY'
+from flask import Flask, jsonify, request
+import redis
+import os
+import time
+
+app = Flask(__name__)
+
+r = redis.Redis(host='localhost', port=6379, decode_responses=True)
+
+ROUTE_FILES = {
+    "announcements": "announcements.txt",
+    "courses": "courses.txt",
+    "faq": "faq.txt"
+}
+
+def read_file_content(filename):
+    time.sleep(2)
+
+    if not os.path.exists(filename):
+        return None
+
+    with open(filename, "r", encoding="utf-8") as f:
+        return f.read()
+
+def get_content(route_name):
+    cached_data = r.get(route_name)
+
+    if cached_data:
+        return {
+            "route": route_name,
+            "source": "cache",
+            "content": cached_data
+        }
+
+    filename = ROUTE_FILES.get(route_name)
+    if not filename:
+        return None
+
+    file_data = read_file_content(filename)
+    if file_data is None:
+        return None
+
+    r.setex(route_name, 60, file_data)
+
+    return {
+        "route": route_name,
+        "source": "file",
+        "content": file_data
+    }
+
+@app.route("/")
+def home():
+    return """
+    Redis File Cache Demo is running.
+    Available routes:
+    /announcements
+    /courses
+    /faq
+    """
+
+@app.route("/announcements")
+def announcements():
+    result = get_content("announcements")
+    if result:
+        return jsonify(result)
+    return jsonify({"error": "Content not found"}), 404
+
+@app.route("/courses", methods=["GET", "POST"])
+def courses():
+    if request.method == "POST":
+        data = request.get_json(silent=True)
+
+        if not data or "course" not in data:
+            return jsonify({"error": "Please provide JSON with a 'course' field"}), 400
+
+        new_course = data["course"].strip()
+
+        if not new_course:
+            return jsonify({"error": "Course entry cannot be empty"}), 400
+
+        with open("courses.txt", "a", encoding="utf-8") as f:
+            f.write("\n" + new_course)
+
+        r.delete("courses")
+
+        return jsonify({
+            "message": "Course added successfully",
+            "added": new_course,
+            "cache": "courses cache cleared"
+        }), 201
+
+    result = get_content("courses")
+    if result:
+        return jsonify(result)
+    return jsonify({"error": "Content not found"}), 404
+
+@app.route("/faq")
+def faq():
+    result = get_content("faq")
+    if result:
+        return jsonify(result)
+    return jsonify({"error": "Content not found"}), 404
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8000)
+PY
+```
+
+## How to change `app.py` file manually
+At the top of `app.py`, change:
 ```python
 from flask import Flask, jsonify
 ```
@@ -305,7 +418,6 @@ from flask import Flask, jsonify, request
 <br>
 
 
-## Step 3: Replace the `/courses` route
 Delete your current `/courses` route and replace it with this:
 ```python
 @app.route("/courses", methods=["GET", "POST"])
@@ -339,7 +451,7 @@ def courses():
     return jsonify({"error": "Content not found"}), 404
 ```
 
-## Step 4: Your full updated `app.py`
+## Your full updated `app.py`
 In case the file is wrong, here is the whole `app.py` file:
 ```python
 from flask import Flask, jsonify, request
@@ -456,7 +568,7 @@ if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000)
 ```
 
-## Step 5: Test the POST request
+## Step 3: Test the POST request
 Open a new PowerShell window on your computer and run this:
 ```powershell
 Invoke-RestMethod -Method POST -Uri "YOUR_IP_ADDRESS/courses" -ContentType "application/json" -Body '{"course":"CS 999 - Cloud Systems Lab"}'
@@ -471,7 +583,7 @@ You should get back something like:
 }
 ```
 
-## Step 6: Verify it worked
+## Step 4: Verify it worked
 ### In the browser, open
 ```powershell
 http://YOUR_IP_ADDRESS/courses
