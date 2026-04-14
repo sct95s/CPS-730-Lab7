@@ -286,7 +286,13 @@ This bonus extension adds **POST support** to the `/courses` route in the Flask 
 
 <br>
 
-## Step 1: Change the import line
+## Step 1: Stop the current running apps
+```powershell
+Ctrl + C
+```
+
+
+## Step 2: Change the import line
 At the top of app.py, change this:
 ```python
 from flask import Flask, jsonify
@@ -299,7 +305,7 @@ from flask import Flask, jsonify, request
 <br>
 
 
-## Step 2: Replace the `/courses` route
+## Step 3: Replace the `/courses` route
 Delete your current `/courses` route and replace it with this:
 ```python
 @app.route("/courses", methods=["GET", "POST"])
@@ -333,7 +339,7 @@ def courses():
     return jsonify({"error": "Content not found"}), 404
 ```
 
-## Step 3: Your full updated `app.py`
+## Step 4: Your full updated `app.py`
 In case the file is wrong, here is the whole `app.py` file:
 ```python
 from flask import Flask, jsonify, request
@@ -450,7 +456,7 @@ if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000)
 ```
 
-## Step 4: Test the POST request
+## Step 5: Test the POST request
 Open a new PowerShell window on your computer and run this:
 ```powershell
 Invoke-RestMethod -Method POST -Uri "YOUR_IP_ADDRESS/courses" -ContentType "application/json" -Body '{"course":"CS 999 - Cloud Systems Lab"}'
@@ -465,7 +471,7 @@ You should get back something like:
 }
 ```
 
-## Step 5: Verify it worked
+## Step 6: Verify it worked
 ### In the browser, open
 ```powershell
 http://YOUR_IP_ADDRESS/courses
