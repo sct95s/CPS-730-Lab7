@@ -1,4 +1,4 @@
-# CPS 730 Lab 7 - Redis + Flask on AWS EC2
+# Redis + Flask on AWS EC2
 
 ## Overview
 This lab deploys a Flask application and Redis cache on an Ubuntu-based Amazon EC2 instance. The application reads content from text files and caches the results in Redis for 60 seconds.
